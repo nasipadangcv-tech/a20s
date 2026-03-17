@@ -50,12 +50,17 @@ export OF_MAINTAINER="Velosh"
 
 # Build Time
 # Ensure we are in the root of the source tree
-if [ -d "build/envsetup.sh" ]; then
+if [ -f "build/envsetup.sh" ]; then
     source build/envsetup.sh
 elif [ -f "../../build/envsetup.sh" ]; then
     cd ../../
     source build/envsetup.sh
 fi
 
+# Use standard make command if mka is not available
 lunch omni_a20s-eng
-mka recoveryimage
+if command -v mka >/dev/null 2>&1; then
+    mka recoveryimage
+else
+    make -j$(nproc --all) recoveryimage
+fi

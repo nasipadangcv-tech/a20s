@@ -33,11 +33,13 @@ jobs:
 
       - name: Symlink Device Tree
         run: |
-          ln -s ../device fox/device/samsung/a20s
+          mkdir -p fox/device/samsung
+          ln -sf $(pwd)/device/samsung/a20s fox/device/samsung/a20s
 
       - name: Build
         run: |
           cd fox
+          export PATH=$(pwd)/bin:$PATH
           bash device/samsung/a20s/build_ofox.sh
 
       - name: Upload Artifacts
