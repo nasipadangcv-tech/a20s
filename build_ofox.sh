@@ -49,6 +49,13 @@ export FOX_BUILD_TYPE="Stable"
 export OF_MAINTAINER="Velosh"
 
 # Build Time
-source build/envsetup.sh
+# Ensure we are in the root of the source tree
+if [ -d "build/envsetup.sh" ]; then
+    source build/envsetup.sh
+elif [ -f "../../build/envsetup.sh" ]; then
+    cd ../../
+    source build/envsetup.sh
+fi
+
 lunch omni_a20s-eng
 mka recoveryimage

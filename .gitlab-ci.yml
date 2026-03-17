@@ -1,0 +1,36 @@
+image: ubuntu:20.04
+
+variables:
+  DEBIAN_FRONTEND: noninteractive
+
+stages:
+  - build
+
+build-recovery:
+  stage: build
+  before_script:
+    - apt-get update
+    - apt-get install -y bc build-essential zip curl libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig git rsync
+    - mkdir -p ~/bin
+    - curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+    - chmod a+x ~/bin/repo
+    - ln -sf ~/bin/repo /usr/bin/repo
+    - git config --global user.name "Dhynto"
+    - git config --global user.email "dhynto@example.com"
+  script:
+    - mkdir fox
+    - cd fox
+    - repo init -u https://gitlab.com/OrangeFox/Manifest.git -b fox_9.0 --depth=1
+    - repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+    - ln -s ../device/samsung/a20s device/samsung/a20s
+    - rsync -a ../ ./ # Ensure files from the root are copied if needed
+    - bash device/samsung/a20s/build_ofox.sh
+  artifacts:
+    name: "OrangeFox-Build-A20s"
+    paths:
+      - fox/out/target/product/a20s/OrangeFox-*.zip
+      - fox/out/target/product/a20s/recovery.img
+      - fox/out/target/product/a20s/recovery.tar
+    expire_in: 1 week
+  only:
+    - pie
