@@ -3,7 +3,10 @@
 # Main flags
 export ALLOW_MISSING_DEPENDENCIES="true"
 export TARGET_ARCH="arm64"
-export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+# Automatically detect JAVA_HOME if it's not set correctly for the environment
+if [ -d "/usr/lib/jvm/java-8-openjdk-amd64" ]; then
+    export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+fi
 export LC_ALL="C"
 
 # TWRP/OFR flags (Common)

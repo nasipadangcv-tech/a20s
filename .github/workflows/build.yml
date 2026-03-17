@@ -1,0 +1,50 @@
+name: Build OrangeFox Recovery
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: device/samsung/a20s
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc build-essential zip curl libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig
+
+      - name: Install Repo
+        run: |
+          mkdir ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          sudo ln -sf ~/bin/repo /usr/bin/repo
+
+      - name: Initialize Recovery Source
+        run: |
+          mkdir fox
+          cd fox
+          repo init -u https://gitlab.com/OrangeFox/Manifest.git -b fox_9.0 --depth=1
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+
+      - name: Symlink Device Tree
+        run: |
+          ln -s ../device fox/device/samsung/a20s
+
+      - name: Build
+        run: |
+          cd fox
+          bash device/samsung/a20s/build_ofox.sh
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: OrangeFox-Build-A20s
+          path: |
+            fox/out/target/product/a20s/OrangeFox-*.zip
+            fox/out/target/product/a20s/recovery.img
+            fox/out/target/product/a20s/recovery.tar
